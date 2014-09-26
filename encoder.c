@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include "debug.h"
 #include "def.h"
-#include "mem.h"
+#include "allocation.h"
 
 BITVEC *initialise_bit_vector();
 
@@ -20,8 +20,7 @@ BITVEC *initialise_bit_vector() {
     return vector;
 }
 
-void encode(FILE *from, FILE *to)
-{
+void encode(FILE *from, FILE *to) {
     char *buffer = reserve(sizeof(char) * 80);
     size_t len = 0;
     int can_write = false;
@@ -44,8 +43,7 @@ void encode(FILE *from, FILE *to)
     log_info("read %lu lines", count);
 }
 
-int main(int argc, char const *argv[])
-{
+int main(int argc, char const *argv[]) {
     if (argc < 3) {
         log_err("usage: %s <from> <to>", argv[0]);
         return 1;

@@ -1,8 +1,7 @@
 #include <stdlib.h>
 #include "debug.h"
 
-void *ensure_space_allocated(void *location)
-{
+void *ensure_space_allocated(void *location) {
     check_mem(location);
     return location;
     error:
@@ -10,5 +9,9 @@ void *ensure_space_allocated(void *location)
 }
 
 void *reserve(size_t amount) {
+    return ensure_space_allocated(malloc(amount));
+}
+
+void *reserve_zeroed(size_t amount) {
     return ensure_space_allocated(calloc(1, amount));
 }

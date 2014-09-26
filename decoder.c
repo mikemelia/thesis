@@ -1,9 +1,10 @@
 #include <stdio.h>
 #include "debug.h"
 #include "def.h"
-#include "mem.h"
+#include "allocation.h"
 
 void add_encoding_for(BITVEC *vector, unsigned long i);
+
 int get_next_decoded_integer_from(BITVEC *vector, unsigned long *i);
 
 BITVEC *initialise_bit_vector();
@@ -20,8 +21,7 @@ BITVEC *initialise_bit_vector() {
     return vector;
 }
 
-void decode(FILE *from, FILE *to)
-{
+void decode(FILE *from, FILE *to) {
     BITVEC *vector = initialise_bit_vector();
     unsigned long count = 0;
     unsigned long number;
@@ -35,8 +35,7 @@ void decode(FILE *from, FILE *to)
     log_info("wrote %lu lines", count);
 }
 
-int main(int argc, char const *argv[])
-{
+int main(int argc, char const *argv[]) {
     if (argc < 3) {
         log_err("usage: %s <from> <to>", argv[0]);
         return 1;
