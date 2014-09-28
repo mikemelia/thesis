@@ -25,21 +25,20 @@ void *char_get(void *buffer, unsigned long position) {
     return &as_char[position];
 }
 
-char *to_string(void *buffer, unsigned long first, unsigned long last) {
+char *to_string(void *buffer, unsigned long first, int length) {
     char *as_char = (char *)buffer;
-    char *as_string = reserve_zeroed(sizeof(char) * (last - first + 2));
-    strncpy(as_string, &buffer[first], (last - first + 1));
+    char *as_string = reserve_zeroed(sizeof(char) * (length + 1));
+    strncpy(as_string, &buffer[first], length);
     return as_string;
 }
 
 int main(int argc, char const *argv[]) {
     TREE *tree = create_tree(&equals, &hash);
     STRING string;
-    string.buffer = "abcabxabcd";
+    string.buffer = "abcabx";
     string.buffer_length = strlen(string.buffer);
     string.equals = &char_equals;
     string.get = &char_get;
     string.to_string = &to_string;
     add_string(tree, &string);
-    print_tree(tree);
 }

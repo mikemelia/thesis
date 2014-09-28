@@ -10,7 +10,7 @@
 #else
 #define debug(M, ...) fprintf(stderr, "[DEBUG] (%s:%d) " M "\n", __FILE__, __LINE__, ##__VA_ARGS__)
 #endif
-#define logfile stdout
+#define logfile stderr
 #define clean_errno() (errno == 0 ? "None" : strerror(errno))
 
 #define log_err(M, ...) fprintf(logfile, "[ERROR] (%s:%d: errno: %s) " M "\n", __FILE__, __LINE__, clean_errno(), ##__VA_ARGS__)

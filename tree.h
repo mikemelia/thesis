@@ -7,7 +7,7 @@ typedef void *(GET_FUNCTION)(void *buffer, unsigned long position);
 
 typedef int (EQUALITY_FUNCTION)(void *buffer, unsigned long first, unsigned long last);
 
-typedef char *(TO_STRING_FUNCTION)(void *buffer, unsigned long first, unsigned long last);
+typedef char *(TO_STRING_FUNCTION)(void *buffer, unsigned long first, int length);
 
 typedef struct string {
     void *buffer;
