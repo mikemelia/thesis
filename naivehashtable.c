@@ -4,10 +4,11 @@
 #include "allocation.h"
 
 void testWithInts();
+
 void testWithChars();
 
 unsigned long charHash(void *value) {
-    char *translation = (char *)value;
+    char *translation = (char *) value;
     int lower = *translation - 'a';
     if (lower < 0) {
         return (*translation - 'A');
@@ -16,19 +17,19 @@ unsigned long charHash(void *value) {
 }
 
 unsigned long intHash(void *value) {
-    int *translation = (int *)value;
+    int *translation = (int *) value;
     return *translation;
 }
 
 int intEquals(void *this, void *that) {
-    int *first = (int *)this;
-    int *second = (int *)that;
+    int *first = (int *) this;
+    int *second = (int *) that;
     return *first == *second;
 }
 
 int charEquals(void *this, void *that) {
-    char *first = (char *)this;
-    char *second = (char *)that;
+    char *first = (char *) this;
+    char *second = (char *) that;
     return *first == *second;
 }
 
@@ -60,7 +61,7 @@ int main(int argc, char const *argv[]) {
 }
 
 void testWithInts() {
-    HASH_TABLE *table = create_hash_table(&intEquals, &intHash, 10);
+    HASH_TABLE *table = create_hash_table(&intEquals, &intHash, 5);
     put(table, create_int_item(1, 2));
     put(table, create_int_item(1, 3));
     put(table, create_int_item(3, 27));
@@ -69,7 +70,7 @@ void testWithInts() {
     for (key = 0; key < 20; key++) {
         ITEM *found = get(table, &key);
         if (found) {
-            unsigned long *i = (unsigned long *)found->value;
+            unsigned long *i = (unsigned long *) found->value;
             log_info("table search for %d found entry with value %lu", key, *i);
         }
 
@@ -86,7 +87,7 @@ void testWithChars() {
     for (key = 'A'; key < 'z'; key++) {
         ITEM *found = get(table, &key);
         if (found) {
-            char *i = (char *)found->value;
+            char *i = (char *) found->value;
             log_info("table search for %c found entry with value %c", key, *i);
         }
 

@@ -71,7 +71,7 @@ int put(HASH_TABLE *table, ITEM *item) {
 
 HASH_TABLE *create_hash_table(EQUALS_FUNCTION *equals, HASH_FUNCTION *hash, int number_of_buckets) {
     HASH_TABLE *table = reserve(sizeof(HASH_TABLE));
-    table->buckets = reserve_zeroed(sizeof(ENTRY) *number_of_buckets);
+    table->buckets = reserve_zeroed(sizeof(ENTRY) * number_of_buckets);
     table->slots = number_of_buckets;
     table->equals = equals;
     table->hash = hash;
