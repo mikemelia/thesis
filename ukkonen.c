@@ -13,6 +13,7 @@ typedef struct edge {
 typedef struct node {
     EDGE *edge;
     HASH_TABLE *children;
+    struct node *suffix_link;
 } NODE;
 
 typedef struct context {
@@ -38,14 +39,14 @@ struct tree {
 };
 
 
-void print_node(NODE *node, TREE *tree) {
+static void print_node(NODE *node, TREE *tree) {
     int start = node->edge->start;
     int end = *node->edge->end;
     char* label = tree->string->to_string(tree->string->buffer, start, end - start + 1);
     log_info("NODE: edge %s from %d to %d", label, start, end);
 }
 
-void print_context(TREE *tree, int iteration) {
+static void print_context(TREE *tree, int iteration) {
     CONTEXT *context = tree->context;
     log_info("CONTEXT for iteration %d:", iteration);
     log_info("distance_into_active_edge = %d", context->distance_into_active_edge);
@@ -70,7 +71,7 @@ static CONTEXT *initialise_context(TREE *tree) {
     CONTEXT *context = reserve(sizeof(CONTEXT));
     context->active_node = tree->root;
     context->active_edge = 0;
-    context->distance_into_active_edge = -1;
+    context->distance_into_active_edge = 0;
     context->unresolved_suffixes = 0;
     context->current_end_position = reserve(sizeof(int));
     *context->current_end_position = -1;
@@ -143,15 +144,14 @@ static void split_nodes(NODE *node_to_split, TREE *tree, int latest_position) {
     int *split_point = reserve(sizeof(int));
     *split_point = tree->context->distance_into_active_edge;
     node_to_split->edge->end = split_point;
-    tree->context->distance_into_active_edge = 0;
 }
 
-int node_already_contains_current_item(TREE *tree, int latest_position, NODE *node_to_split) {
+static int node_already_contains_current_item(TREE *tree, int latest_position, NODE *node_to_split) {
     STRING *string = tree->string;
-    return string->equals(string->buffer, (node_to_split->edge->start + tree->context->distance_into_active_edge + tree->context->unresolved_suffixes), latest_position);
+    return string->equals(string->buffer, (node_to_split->edge->start + tree->context->distance_into_active_edge), latest_position);
 }
 
-void handle_new_entry(TREE *tree, int position) {
+static void handle_new_entry(TREE *tree, int position) {
     void *current = at_position(tree, position);
     if (get(tree->context->active_node->children, current)) {
         defer_addition(tree, current);
@@ -160,33 +160,74 @@ void handle_new_entry(TREE *tree, int position) {
     }
 }
 
-void handle_unresolved_suffixes(TREE *tree, int latest_position) {
-    int unresolved_suffixes = tree->context->unresolved_suffixes;
-    void *previous = at_position(tree, latest_position - unresolved_suffixes);
-    NODE *node_to_split = get(tree->context->active_node->children, previous)->value;
-    STRING *string = tree->string;
-    if (node_already_contains_current_item(tree, latest_position, node_to_split)) {
-        log_info("Matched %s to %s", string->to_string(string->buffer, (node_to_split->edge->start + unresolved_suffixes), 1),
-                string->to_string(string->buffer, latest_position, 1));
-        tree->context->distance_into_active_edge += 1;
-        tree->context->unresolved_suffixes += 1;
-    } else {
-        log_info("should split them %s isn't %s", string->to_string(string->buffer, (node_to_split->edge->start + tree->context->distance_into_active_edge), 1),
-                string->to_string(string->buffer, latest_position, 1));
-        split_nodes(node_to_split, tree, latest_position);
-        tree->context->unresolved_suffixes -= 1;
-        handle_new_entry(tree, latest_position);
+static char *as_char(void *to_convert) {
+    return (char *)to_convert;
+}
+
+static void create_suffix_link(NODE *previously_split, NODE *node_to_split) {
+    node_to_split->suffix_link = previously_split;
+    previously_split = node_to_split;
+}
+
+static void move_active_edge_to_next_branch(TREE *tree, int latest_position) {
+    tree->context->active_edge = *as_char(at_position(tree, latest_position - tree->context->unresolved_suffixes + 1));
+    tree->context->distance_into_active_edge -= 1;
+}
+
+static int position_in_active_edge(TREE *tree) {
+    return tree->context->distance_into_active_edge;
+}
+
+static int *edge_end(NODE *node_to_split) {
+    return node_to_split->edge->end;
+}
+
+static char *active_edge(TREE *tree) {
+    return &tree->context->active_edge;
+}
+
+static HASH_TABLE *children_of_active_node(TREE *tree) {
+    return tree->context->active_node->children;
+}
+
+static void decrement_unresolved_suffixes(TREE *tree) {
+    tree->context->unresolved_suffixes -= 1;
+}
+
+static void increment_unresolved_suffixes(TREE *tree) {
+    tree->context->unresolved_suffixes += 1;
+}
+
+static int unresolved_suffixes(TREE *tree) {
+    return tree->context->unresolved_suffixes;
+}
+
+static int handle_unresolved_suffixes(TREE *tree, int latest_position) {
+    NODE *previously_split;
+    while (unresolved_suffixes(tree)) {
+        NODE *node_to_split = get(children_of_active_node(tree), active_edge(tree))->value;
+        if (node_already_contains_current_item(tree, latest_position, node_to_split)) {
+            if (*edge_end(node_to_split) < position_in_active_edge(tree)) {
+                tree->context->active_node = get(node_to_split->children, at_position(tree, latest_position))->value;
+                tree->context->distance_into_active_edge = 0;
+            } else {
+                tree->context->distance_into_active_edge += 1;
+            }
+            increment_unresolved_suffixes(tree);
+            return 0;
+        } else {
+            split_nodes(node_to_split, tree, latest_position);
+            move_active_edge_to_next_branch(tree, latest_position);
+            create_suffix_link(previously_split, node_to_split);
+            decrement_unresolved_suffixes(tree);
+        }
     }
+    return 1;
 }
 
 static void add_node(TREE *tree, int position) {
     *tree->context->current_end_position += 1;
-    int unresolved_suffixes = tree->context->unresolved_suffixes;
-    if (unresolved_suffixes > 0) {
-        handle_unresolved_suffixes(tree, position);
-    } else {
-        handle_new_entry(tree, position);
-    }
+    if (handle_unresolved_suffixes(tree, position)) handle_new_entry(tree, position);
 }
 
 TREE *create_tree(EQUALS_FUNCTION *equals, HASH_FUNCTION *hash) {

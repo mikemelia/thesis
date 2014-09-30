@@ -35,7 +35,7 @@ char *to_string(void *buffer, unsigned long first, int length) {
 int main(int argc, char const *argv[]) {
     TREE *tree = create_tree(&equals, &hash);
     STRING string;
-    string.buffer = "abcabx";
+    string.buffer = "abcabxabcd";
     string.buffer_length = strlen(string.buffer);
     string.equals = &char_equals;
     string.get = &char_get;
