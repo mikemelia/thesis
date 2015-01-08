@@ -150,7 +150,6 @@ int get_run_length(BITVEC *vp) {
 
 /* Standard delta (Elias) */
 int put_delta(BITVEC *vp, int n) {
-    double floor(), log10();
     int mag;
     int ret;
 

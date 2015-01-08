@@ -21,7 +21,7 @@ typedef struct context {
     NODE *active_node;
     char active_edge;
     int distance_into_active_edge;
-    int unresolved_suffixes ;
+    int unresolved_suffixes;
 } CONTEXT;
 
 typedef struct printable {
@@ -42,7 +42,7 @@ struct tree {
 static void print_node(NODE *node, TREE *tree) {
     int start = node->edge->start;
     int end = *node->edge->end;
-    char* label = tree->string->to_string(tree->string->buffer, start, end - start + 1);
+    char *label = tree->string->to_string(tree->string->buffer, start, end - start + 1);
     log_info("NODE: edge %s from %d to %d", label, start, end);
 }
 
@@ -115,7 +115,7 @@ static void add_new_node(TREE *tree, int position, char *current) {
 void defer_addition(TREE *tree, char *current) {
     tree->context->active_edge = *current;
     tree->context->distance_into_active_edge += 1;
-    tree->context->unresolved_suffixes +=1;
+    tree->context->unresolved_suffixes += 1;
 }
 
 void *at_position(TREE *tree, int position) {
@@ -128,7 +128,7 @@ static void split_nodes(NODE *node_to_split, TREE *tree, int latest_position) {
     old_node->edge->end = tree->context->current_end_position;
 
     ITEM *old_item = reserve(sizeof(ITEM));
-    old_item->key =  at_position(tree, (tree->context->distance_into_active_edge + 1));
+    old_item->key = at_position(tree, (tree->context->distance_into_active_edge + 1));
     old_item->value = old_node;
     put(node_to_split->children, old_item);
 
@@ -136,7 +136,7 @@ static void split_nodes(NODE *node_to_split, TREE *tree, int latest_position) {
     new_node->edge->start = latest_position;
     new_node->edge->end = tree->context->current_end_position;
     ITEM *new_item = reserve(sizeof(ITEM));
-    new_item->key =  at_position(tree, latest_position);
+    new_item->key = at_position(tree, latest_position);
     new_item->value = new_node;
 
     put(node_to_split->children, new_item);
@@ -161,7 +161,7 @@ static void handle_new_entry(TREE *tree, int position) {
 }
 
 static char *as_char(void *to_convert) {
-    return (char *)to_convert;
+    return (char *) to_convert;
 }
 
 static void create_suffix_link(NODE *previously_split, NODE *node_to_split) {
@@ -198,32 +198,62 @@ static void increment_unresolved_suffixes(TREE *tree) {
     tree->context->unresolved_suffixes += 1;
 }
 
-static int unresolved_suffixes(TREE *tree) {
+static int there_are_suffixes_to_add(TREE *tree) {
     return tree->context->unresolved_suffixes;
+}
+
+static void *get_value(HASH_TABLE *table, char *active_edge_label) {
+    return get(table, active_edge_label)->value;
+}
+
+static void move_active_node_into_child(TREE *tree, int latest_position, NODE *node_to_split) {
+    tree->context->active_node = get_value(node_to_split->children, at_position(tree, latest_position));
+    tree->context->distance_into_active_edge = 0;
+}
+
+static void move_active_point_along_one(TREE *tree) {
+    tree->context->distance_into_active_edge += 1;
+}
+
+static void active_edge_contains_current(TREE *tree, int latest_position, NODE *node_with_active_edge) {
+    if (*edge_end(node_with_active_edge) < position_in_active_edge(tree)) {
+        move_active_node_into_child(tree, latest_position, node_with_active_edge);
+    } else {
+        move_active_point_along_one(tree);
+    }
+    increment_unresolved_suffixes(tree);
+}
+
+static void move_active_point_along_suffix_link(TREE *tree, NODE *node_with_active_edge) {
+    if (node_with_active_edge->suffix_link == NULL) {
+        tree->context->active_node = tree->root;
+    } else {
+        tree->context->active_node = node_with_active_edge->suffix_link;
+    }
 }
 
 static int handle_unresolved_suffixes(TREE *tree, int latest_position) {
     NODE *previously_split;
-    while (unresolved_suffixes(tree)) {
-        NODE *node_to_split = get(children_of_active_node(tree), active_edge(tree))->value;
-        if (node_already_contains_current_item(tree, latest_position, node_to_split)) {
-            if (*edge_end(node_to_split) < position_in_active_edge(tree)) {
-                tree->context->active_node = get(node_to_split->children, at_position(tree, latest_position))->value;
-                tree->context->distance_into_active_edge = 0;
-            } else {
-                tree->context->distance_into_active_edge += 1;
-            }
-            increment_unresolved_suffixes(tree);
+    while (there_are_suffixes_to_add(tree)) {
+        NODE *node_with_active_edge = get_value(children_of_active_node(tree), active_edge(tree));
+        if (node_already_contains_current_item(tree, latest_position, node_with_active_edge)) {
+            active_edge_contains_current(tree, latest_position, node_with_active_edge);
             return 0;
         } else {
-            split_nodes(node_to_split, tree, latest_position);
-            move_active_edge_to_next_branch(tree, latest_position);
-            create_suffix_link(previously_split, node_to_split);
+            split_nodes(node_with_active_edge, tree, latest_position);
+            if (node_with_active_edge != tree->root) {
+                move_active_point_along_suffix_link(tree, node_with_active_edge);
+            } else {
+                move_active_edge_to_next_branch(tree, latest_position);
+                create_suffix_link(previously_split, node_with_active_edge);
+            }
             decrement_unresolved_suffixes(tree);
         }
     }
     return 1;
 }
+
+
 
 static void add_node(TREE *tree, int position) {
     *tree->context->current_end_position += 1;

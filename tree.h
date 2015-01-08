@@ -1,4 +1,4 @@
-#import "hashtable.h"
+#include "hashtable.h"
 
 struct tree;
 typedef struct tree TREE;
@@ -20,4 +20,5 @@ typedef struct string {
 TREE *create_tree(EQUALS_FUNCTION *equals, HASH_FUNCTION *hash);
 
 void print_tree(TREE *tree);
+
 void add_string(TREE *tree, STRING *string);
