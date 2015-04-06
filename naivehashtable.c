@@ -14,20 +14,29 @@ struct hash_table {
     int slots;
 };
 
+static long number_of_gets = 0;
+static long number_of_comparisons = 0;
+
 static int slot_for(int slots, unsigned long value) {
     return value % slots;
 }
 
 static LINKED_ENTRY *find_entry_in_list(EQUALS_FUNCTION *equals, LINKED_ENTRY *start, void *key) {
     LINKED_ENTRY *current = start;
+    number_of_comparisons += 1;
     while (!equals(current->item->key, key)) {
         if (current->next == NULL) return NULL;
         current = current->next;
+        number_of_comparisons += 1;
     }
     return current;
 }
+void print_hash_usage() {
+    log_info("%ld gets with %ld comparisons", number_of_gets, number_of_comparisons);
+}
 
 ITEM *get(HASH_TABLE *table, void *key) {
+    number_of_gets += 1;
     int bucket = slot_for(table->slots, table->hash(key));
     LINKED_ENTRY *entry = table->buckets[bucket];
     if (entry == NULL) return NULL;
@@ -71,7 +80,8 @@ int put(HASH_TABLE *table, ITEM *item) {
 }
 
 void print_entry(ITEM *item) {
-    log_info("Item has key of %s and value of %s", (char *)item->key, (char *)item->value);
+    char *key = (char *)item->key;
+    log_info("Item has key of %c", *key);
 }
 
 void print_bucket(LINKED_ENTRY *bucket, int slot) {

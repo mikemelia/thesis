@@ -20,4 +20,7 @@ int put(HASH_TABLE *table, ITEM *item);
 void print(HASH_TABLE *table);
 
 ITEM *get(HASH_TABLE *table, void *value);
+
+void print_hash_usage();
+
 #endif

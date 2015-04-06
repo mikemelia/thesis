@@ -17,8 +17,15 @@ typedef struct string {
     TO_STRING_FUNCTION *to_string;
 } STRING;
 
+typedef struct positions {
+    int num_entries;
+    int *entries;
+} POSITIONS;
+
 TREE *create_tree(EQUALS_FUNCTION *equals, HASH_FUNCTION *hash);
 
 void print_tree(TREE *tree);
 
 void add_string(TREE *tree, STRING *string);
+
+POSITIONS *get_positions_matching(TREE *tree, STRING *string);

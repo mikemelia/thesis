@@ -74,6 +74,7 @@ int main(int argc, char const *argv[]) {
     testWithThings();
 }
 
+
 void testWithInts() {
     HASH_TABLE *table = create_hash_table(&intEquals, &intHash, 5);
     put(table, create_int_item(1, 2));
@@ -97,6 +98,11 @@ void testWithChars() {
     put(table, create_char_item('c', 'd'));
     put(table, create_char_item('A', 'B'));
     put(table, create_char_item('C', 'D'));
+    put(table, create_char_item('b', 'D'));
+    put(table, create_char_item('S', 'D'));
+    put(table, create_char_item('5', 'D'));
+    put(table, create_char_item('f', 'D'));
+    put(table, create_char_item('x', 'D'));
     char key;
     for (key = 'A'; key < 'z'; key++) {
         ITEM *found = get(table, &key);
@@ -127,4 +133,5 @@ void testWithThings() {
         }
 
     }
+    print(table);
 }
