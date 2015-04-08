@@ -1,6 +1,8 @@
 #include "hashtable.h"
 
 struct tree;
+static const int FALSE = 0;
+static const int TRUE = 1;
 typedef struct tree TREE;
 
 typedef void *(GET_FUNCTION)(void *buffer, unsigned long position);

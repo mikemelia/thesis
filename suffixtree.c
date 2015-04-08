@@ -36,11 +36,13 @@ char *to_string(void *buffer, unsigned long first, int length) {
 
 int main(int argc, char const *argv[]) {
     TREE *tree = create_tree(&equals, &hash);
+
     STRING string;
-//    string.buffer = "acgactacgxacg$";
-//    string.buffer = "abcabxabcd$";
+    string.buffer = "acgactacgxacg$";
+    string.buffer = "abcabxabcd$";
+//    string.buffer = read_from("/Volumes/Flash/0ws0110.txt");
 //    string.buffer = read_from("/Volumes/Flash/pgwht04.txt");
-    string.buffer = read_from("/Users/michael/Dropbox/University/dev/thesis/test2.txt");
+//    string.buffer = read_from("/Users/michael/Dropbox/University/dev/thesis/test2.txt");
 //    string.buffer = read_from("/Users/michael/Dropbox/University/dev/thesis/test.txt");
     string.buffer_length = strlen(string.buffer);
     string.equals = &char_equals;
