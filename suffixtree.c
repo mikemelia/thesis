@@ -42,15 +42,15 @@ int main(int argc, char const *argv[]) {
 //    string.buffer = "acgactacgxacg$";
 //    string.buffer = "abcabxabe$";
 //    string.buffer = "abcabxabcd$";
-//    string.buffer = read_from("/Volumes/Flash/0ws0110.txt");
+    string.buffer = read_from("/Volumes/Flash/0ws0110.txt");
 //    string.buffer = read_from("/Volumes/Flash/pgwht04.txt");
 //    string.buffer = read_from("/Users/michael/Dropbox/University/dev/thesis/test.txt");
-    string.buffer = read_from("/Users/michael/Dropbox/University/dev/thesis/test2.txt");
+//    string.buffer = read_from("/Users/michael/Dropbox/University/dev/thesis/test2.txt");
     string.buffer_length = strlen(string.buffer);
     string.equals = &char_equals;
     string.get = &char_get;
     string.to_string = &to_string;
     add_string(tree, &string);
-    char *pattern = "*";
+    char *pattern = "English";
     log_info("num positions matching %s is %d", pattern, num_positions_matching(tree, pattern));
 }

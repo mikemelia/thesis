@@ -19,6 +19,7 @@ typedef struct context {
     NODE *active_node;
     void *active_edge;
     int active_length;
+    int original_active_length;
     int unresolved_suffixes;
 } CONTEXT;
 
@@ -233,7 +234,7 @@ static NODE *create_suffix_link(NODE *previously_split, NODE *node) {
 
 static void move_active_edge_to_next_branch(TREE *tree, int latest_position) {
     tree->context->active_edge = at_position(tree, latest_position - tree->context->unresolved_suffixes);
-    tree->context->active_length -= 1;
+    tree->context->active_length = tree->context->original_active_length - 1;
     char *edge = (char *)tree->context->active_edge;
     debug("Active edge now set to %c", *edge);
 }
@@ -264,14 +265,9 @@ static void *get_value(HASH_TABLE *table, void *key) {
     return get(table, key)->value;
 }
 
-static void move_active_node_into_child(TREE *tree, NODE *node_with_active_edge, void *child_key) {
-    tree->context->active_node = node_with_active_edge;
-    tree->context->active_length = 1;
-    tree->context->active_edge = child_key;
-}
-
 static void move_active_point_along_one(TREE *tree) {
     tree->context->active_length += 1;
+    tree->context->original_active_length += 1;
 }
 
 static void active_edge_contains_current_char(TREE *tree, int latest_position, NODE *node_with_active_edge) {
@@ -283,9 +279,11 @@ static void  move_active_node_along_suffix_link(TREE *tree) {
     if (tree->context->active_node->suffix_link == NULL) {
         debug("traversed back to root");
         tree->context->active_node = tree->root;
+        tree->context->active_length = --tree->context->original_active_length;
     } else {
         debug("TRAVERSING a suffix link from node(%d, %d) to node(%d, %d)", tree->context->active_node->edge->start, *tree->context->active_node->edge->end, tree->context->active_node->suffix_link->edge->start, *tree->context->active_node->suffix_link->edge->end);
         tree->context->active_node = tree->context->active_node->suffix_link;
+        tree->context->original_active_length = tree->context->active_length;
     }
 }
 
@@ -317,7 +315,9 @@ NODE *reset_active_point(TREE *tree, int latest_position) {
 static int handle_unresolved_suffixes(TREE *tree, int latest_position) {
     NODE *previously_split = NULL;
     while (there_are_suffixes_to_add(tree)) {
-
+        if (tree->context->active_node == tree->root) {
+            tree->context->original_active_length = tree->context->active_length;
+        }
         NODE *node_with_active_point = reset_active_point(tree, latest_position);
 
         if (next_char_on_edge_matches_latest(tree, node_with_active_point, latest_position)) {
