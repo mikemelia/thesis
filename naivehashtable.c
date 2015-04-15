@@ -109,3 +109,31 @@ HASH_TABLE *create_hash_table(EQUALS_FUNCTION *equals, HASH_FUNCTION *hash, int 
     table->hash = hash;
     return table;
 }
+
+REPORT *report_on(HASH_TABLE *table) {
+    int i = 0;
+    int count = 0;
+    for (i = 0; i < table->slots; i++) {
+        LINKED_ENTRY *bucket = table->buckets[i];
+        if (bucket != NULL) {
+            while (bucket != NULL) {
+                count ++;
+                bucket = bucket->next;
+            }
+        }
+    }
+    REPORT *report = reserve(sizeof(REPORT));
+    report->num_entries = count;
+    report->entries = reserve(sizeof(ITEM *) * count);
+    int j = 0;
+    for (i = 0; i < table->slots; i++) {
+        LINKED_ENTRY *bucket = table->buckets[i];
+        if (bucket != NULL) {
+            while (bucket != NULL) {
+                report->entries[j++] = bucket->item;
+                bucket = bucket->next;
+            }
+        }
+    }
+    return report;
+}

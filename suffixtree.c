@@ -2,6 +2,7 @@
 #include <string.h>
 #include "allocation.h"
 #include "filereader.h"
+#include "debug.h"
 
 int adjust_char(char *unadjusted) {
 //    if (*unadjusted >= 'a') return (*unadjusted - 'a');
@@ -38,23 +39,18 @@ int main(int argc, char const *argv[]) {
     TREE *tree = create_tree(&equals, &hash);
 
     STRING string;
-    string.buffer = "acgactacgxacg$";
-    string.buffer = "abcabxabcd$";
+//    string.buffer = "acgactacgxacg$";
+//    string.buffer = "abcabxabe$";
+//    string.buffer = "abcabxabcd$";
 //    string.buffer = read_from("/Volumes/Flash/0ws0110.txt");
 //    string.buffer = read_from("/Volumes/Flash/pgwht04.txt");
-//    string.buffer = read_from("/Users/michael/Dropbox/University/dev/thesis/test2.txt");
 //    string.buffer = read_from("/Users/michael/Dropbox/University/dev/thesis/test.txt");
+    string.buffer = read_from("/Users/michael/Dropbox/University/dev/thesis/test2.txt");
     string.buffer_length = strlen(string.buffer);
     string.equals = &char_equals;
     string.get = &char_get;
     string.to_string = &to_string;
     add_string(tree, &string);
-//    print_tree(tree);
-    STRING to_find;
-    to_find.buffer = "a";
-    to_find.buffer_length = strlen(to_find.buffer);
-    to_find.equals = &char_equals;
-    to_find.get = &char_get;
-    to_find.to_string = &to_string;
-//    POSITIONS *positions = get_positions_matching(tree, &to_find);
+    char *pattern = "*";
+    log_info("num positions matching %s is %d", pattern, num_positions_matching(tree, pattern));
 }
