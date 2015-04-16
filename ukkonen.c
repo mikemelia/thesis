@@ -19,7 +19,6 @@ typedef struct context {
     NODE *active_node;
     void *active_edge;
     int active_length;
-    int original_active_length;
     int unresolved_suffixes;
 } CONTEXT;
 
@@ -210,6 +209,8 @@ static int next_char_on_edge_matches_latest(TREE *tree, NODE *node_with_edge, in
     if (edge_length(node_with_edge) == tree->context->active_length) {
         return get(node_with_edge->children, string->get(string->buffer, latest_position)) != NULL;
     }
+    debug("Comparing %c with %c", *(char *)string->get(string->buffer, node_with_edge->edge->start + tree->context->active_length),
+          *(char *)string->get(string->buffer, latest_position));
     return string->equals(string->buffer, (node_with_edge->edge->start + tree->context->active_length), latest_position);
 }
 
@@ -233,8 +234,8 @@ static NODE *create_suffix_link(NODE *previously_split, NODE *node) {
 }
 
 static void move_active_edge_to_next_branch(TREE *tree, int latest_position) {
-    tree->context->active_edge = at_position(tree, latest_position - tree->context->unresolved_suffixes);
-    tree->context->active_length = tree->context->original_active_length - 1;
+    tree->context->active_edge = at_position(tree, latest_position - tree->context->unresolved_suffixes + 1);
+    tree->context->active_length -= 1;
     char *edge = (char *)tree->context->active_edge;
     debug("Active edge now set to %c", *edge);
 }
@@ -267,10 +268,9 @@ static void *get_value(HASH_TABLE *table, void *key) {
 
 static void move_active_point_along_one(TREE *tree) {
     tree->context->active_length += 1;
-    tree->context->original_active_length += 1;
 }
 
-static void active_edge_contains_current_char(TREE *tree, int latest_position, NODE *node_with_active_edge) {
+static void active_edge_contains_current_char(TREE *tree) {
     move_active_point_along_one(tree);
     increment_unresolved_suffixes(tree);
 }
@@ -279,11 +279,9 @@ static void  move_active_node_along_suffix_link(TREE *tree) {
     if (tree->context->active_node->suffix_link == NULL) {
         debug("traversed back to root");
         tree->context->active_node = tree->root;
-        tree->context->active_length = --tree->context->original_active_length;
     } else {
         debug("TRAVERSING a suffix link from node(%d, %d) to node(%d, %d)", tree->context->active_node->edge->start, *tree->context->active_node->edge->end, tree->context->active_node->suffix_link->edge->start, *tree->context->active_node->suffix_link->edge->end);
         tree->context->active_node = tree->context->active_node->suffix_link;
-        tree->context->original_active_length = tree->context->active_length;
     }
 }
 
@@ -296,7 +294,8 @@ NODE *reset_active_point(TREE *tree, int latest_position) {
     STRING *string = tree->string;
     int length_of_edge = (edge_length(node_with_active_point));
     while (position_in_active_edge(tree) > length_of_edge) {
-        void *new_active_edge = string->get(string->buffer, latest_position - tree->context->unresolved_suffixes + 1);
+        int start_of_sequence = latest_position - tree->context->active_length + length_of_edge;
+        void *new_active_edge = string->get(string->buffer, start_of_sequence);
         ITEM *item = get(node_with_active_point->children, new_active_edge);
         if (item != NULL) {
             tree->context->active_node = node_with_active_point;
@@ -305,6 +304,7 @@ NODE *reset_active_point(TREE *tree, int latest_position) {
             node_with_active_point = item->value;
             length_of_edge = edge_length(node_with_active_point);
             debug("moving active point out of (%d, %d) to (%d, %d)", tree->context->active_node->edge->start, *tree->context->active_node->edge->end, node_with_active_point->edge->start, *node_with_active_point->edge->end);
+            print_context(tree, latest_position);
         } else {
             return node_with_active_point;
         }
@@ -315,13 +315,11 @@ NODE *reset_active_point(TREE *tree, int latest_position) {
 static int handle_unresolved_suffixes(TREE *tree, int latest_position) {
     NODE *previously_split = NULL;
     while (there_are_suffixes_to_add(tree)) {
-        if (tree->context->active_node == tree->root) {
-            tree->context->original_active_length = tree->context->active_length;
-        }
+
         NODE *node_with_active_point = reset_active_point(tree, latest_position);
 
         if (next_char_on_edge_matches_latest(tree, node_with_active_point, latest_position)) {
-            active_edge_contains_current_char(tree, latest_position, node_with_active_point);
+            active_edge_contains_current_char(tree);
             print_context(tree, latest_position);
             return FALSE;
         } else {
@@ -329,11 +327,13 @@ static int handle_unresolved_suffixes(TREE *tree, int latest_position) {
                 debug("adding a child to (%d, %d) for %d", node_with_active_point->edge->start, *node_with_active_point->edge->end, latest_position);
                 add_child_to(tree, node_with_active_point, latest_position);
             } else {
-                split_edge(node_with_active_point, tree, latest_position);
-                if (previously_split != node_with_active_point) {
-                    previously_split = create_suffix_link(previously_split, node_with_active_point);
+                NODE *child_node = split_edge(node_with_active_point, tree, latest_position);
+                if (previously_split == node_with_active_point) {
+                    debug("doing the weird split");
+                    previously_split = child_node;
                 }
             }
+            previously_split = create_suffix_link(previously_split, node_with_active_point);
             if (active_node(tree) != tree->root) {
                 move_active_node_along_suffix_link(tree);
             } else {
@@ -363,7 +363,6 @@ void add_string(TREE *tree, STRING *string) {
     for (i = 0; i < tree->string->buffer_length; i++) {
         add_node(tree, i);
     }
-    log_info("Processed %ld with %d nodes", tree->string->buffer_length, number_of_nodes);
 //    print_hash_usage();
 
 }
