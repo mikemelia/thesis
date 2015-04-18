@@ -43,18 +43,6 @@ struct tree {
 
 static int number_of_nodes = 0;
 
-static void print_node(NODE *node, TREE *tree) {
-    REPORT *reportOn = report_on(node->children);
-    if (reportOn->num_entries == 0) {
-
-        int start = node->edge->start;
-        int end = *node->edge->end;
-        char *label = tree->string->to_string(tree->string->buffer, start, end - start + 1);
-        log_info("NODE: edge %s from %d to %d", label, start, end);
-    }
-
-}
-
 static char *as_char(void *to_convert) {
     return (char *) to_convert;
 }
@@ -72,17 +60,6 @@ static void print_context(TREE *tree, int iteration) {
     debug("active_length = %d", context->active_length);
     debug("unresolved suffixes = %d", context->unresolved_suffixes);
     debug("current_end_position %d", *context->current_end_position);
-}
-
-void print_tree(TREE *tree) {
-    PRINTABLE *printable = tree->printable;
-    log_info("PRINTING TREE");
-    while (printable != NULL) {
-        NODE *node = printable->node;
-        print_node(node, tree);
-        print(node->children);
-        printable = printable->next;
-    }
 }
 
 static int position_in_active_edge(TREE *tree) {
@@ -315,11 +292,12 @@ NODE *reset_active_point(TREE *tree, int latest_position) {
 static int handle_unresolved_suffixes(TREE *tree, int latest_position) {
     NODE *previously_split = NULL;
     while (there_are_suffixes_to_add(tree)) {
-
+        if (active_node(tree) == tree->root && position_in_active_edge(tree) == 0) return TRUE;
         NODE *node_with_active_point = reset_active_point(tree, latest_position);
-
         if (next_char_on_edge_matches_latest(tree, node_with_active_point, latest_position)) {
             active_edge_contains_current_char(tree);
+            create_suffix_link(previously_split, node_with_active_point);
+//            if (previously_split != NULL && active_node(tree) != tree->root && position_in_active_edge(tree) >= edge_length(node_with_active_point)) create_suffix_link(previously_split, node_with_active_point);
             print_context(tree, latest_position);
             return FALSE;
         } else {
@@ -336,11 +314,10 @@ static int handle_unresolved_suffixes(TREE *tree, int latest_position) {
             previously_split = create_suffix_link(previously_split, node_with_active_point);
             if (active_node(tree) != tree->root) {
                 move_active_node_along_suffix_link(tree);
-            } else {
+            } else if (position_in_active_edge(tree) > 0) {
                 move_active_edge_to_next_branch(tree, latest_position);
             }
             decrement_unresolved_suffixes(tree);
-
         }
         print_context(tree, latest_position);
     }
@@ -363,8 +340,6 @@ void add_string(TREE *tree, STRING *string) {
     for (i = 0; i < tree->string->buffer_length; i++) {
         add_node(tree, i);
     }
-//    print_hash_usage();
-
 }
 
 int num_children(NODE *node) {

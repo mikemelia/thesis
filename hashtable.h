@@ -1,32 +1,28 @@
-#ifndef __hashtable_h__
-#define __hashtable_h__
-typedef struct item {
-    void *key;
-    void *value;
-} ITEM;
+#include "equals.h"
+#include "hash.h"
+#include "report.h"
+#include "item.h"
+#include "bucket.h"
 
+#ifndef __hashtable_h__
+
+#define __hashtable_h__
 struct hash_table;
 
-typedef struct report {
-    int num_entries;
-    ITEM **entries;
-} REPORT;
-
-typedef struct hash_table HASH_TABLE;
-
-typedef unsigned long (HASH_FUNCTION)(void *);
-
-typedef int (EQUALS_FUNCTION)(void *, void *);
+typedef struct hash_table {
+    HASH_FUNCTION *hash;
+    EQUALS_FUNCTION *equals;
+    BUCKET **buckets;
+    int slots;
+} HASH_TABLE;
 
 HASH_TABLE *create_hash_table(EQUALS_FUNCTION *equals, HASH_FUNCTION *hash, int number_of_buckets);
 
-int put(HASH_TABLE *table, ITEM *item);
+void put(HASH_TABLE *table, ITEM *item);
 
-void print(HASH_TABLE *table);
+ITEM *get(HASH_TABLE *table, void *key);
 
-ITEM *get(HASH_TABLE *table, void *value);
-
-void print_hash_usage();
+long number_of_gets();
 
 REPORT *report_on(HASH_TABLE *table);
 

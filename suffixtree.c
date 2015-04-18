@@ -52,7 +52,7 @@ static void assert_in(int dataset, char *pattern, char *text, int expected) {
     if (matching != expected) {
         log_info("Failed to find %d '%s' in dataset %d, instead got %d", expected, pattern, dataset, matching);
     } else {
-        log_info("test passed for pattern %s in dataset %d", pattern, dataset);
+        log_info("test passed for pattern %s in dataset %d; expected %d and got %d", pattern, dataset, expected, matching);
     }
 }
 
@@ -62,6 +62,7 @@ int main(int argc, char const *argv[]) {
 //    string.buffer = read_from("/Volumes/Flash/pgwht04.txt");
 //    string.buffer = read_from("/Users/michael/Dropbox/University/dev/thesis/test3.txt");
 //    string.buffer = read_from("/Users/michael/Dropbox/University/dev/thesis/test2.txt");
+
     assert_in(1, "ab", "abcabxabcd$", 3);
     assert_in(1, "x", "abcabxabcd$", 1);
     assert_in(1, "a", "abcabxabcd$", 3);
@@ -72,8 +73,9 @@ int main(int argc, char const *argv[]) {
     assert_in(3, "**", read_from("/Users/michael/Dropbox/University/dev/thesis/test3.txt"), 4);
     assert_in(3, "**", read_from("/Users/michael/Dropbox/University/dev/thesis/test3.txt"), 4);
     assert_in(3, "***", read_from("/Users/michael/Dropbox/University/dev/thesis/test3.txt"), 2);
-    assert_in(4, "*", read_from("/Users/michael/Dropbox/University/dev/thesis/test2.txt"), 38);
-    assert_in(4, "***", read_from("/Users/michael/Dropbox/University/dev/thesis/test2.txt"), 30);
-    assert_in(5, "English", read_from("/Volumes/Flash/0ws0110.txt"), 1);
+    assert_in(4, "*", read_from("/Users/michael/Dropbox/University/dev/thesis/test4.txt"), 10);
+    assert_in(5, "*", read_from("/Users/michael/Dropbox/University/dev/thesis/test2.txt"), 38);
+//    assert_in(5, "***", read_from("/Users/michael/Dropbox/University/dev/thesis/test2.txt"), 30);
+//    assert_in(6, "English", read_from("/Volumes/Flash/0ws0110.txt"), 1);
 }
 

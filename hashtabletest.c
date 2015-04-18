@@ -39,10 +39,8 @@ ITEM *create_int_item(int key, int value) {
     ITEM *item = reserve(sizeof(ITEM));
     item->key = reserve(sizeof(int));
     item->value = reserve(sizeof(int));
-    int *key_a = item->key;
-    int *value_a = item->value;
-    *key_a = key;
-    *value_a = value;
+    *(int *)item->key = key;
+    *(int *)item->value = value;
     return item;
 }
 
@@ -50,10 +48,8 @@ ITEM *create_char_item(char key, char value) {
     ITEM *item = reserve(sizeof(ITEM));
     item->key = reserve(sizeof(char));
     item->value = reserve(sizeof(char));
-    char *key_a = item->key;
-    char *value_a = item->value;
-    *key_a = key;
-    *value_a = value;
+    *(char *)item->key = key;
+    *(char *)item->value = value;
     return item;
 }
 
@@ -88,7 +84,6 @@ void testWithInts() {
             unsigned long *i = (unsigned long *) found->value;
             log_info("table search for %d found entry with value %lu", key, *i);
         }
-
     }
 }
 
@@ -111,7 +106,6 @@ void testWithChars() {
             log_info("table search for %c found entry with value %c", key, *i);
         }
     }
-    print(table);
 }
 
 void testWithThings() {
@@ -133,5 +127,4 @@ void testWithThings() {
         }
 
     }
-    print(table);
 }
