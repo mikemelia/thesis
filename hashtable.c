@@ -6,14 +6,25 @@
 #include "item.h"
 #include "hashtable.h"
 #include "allocation.h"
-#include "bucket.h"
-#include "hash.h"
 
-static long get_called = 0;
-
-long number_of_gets() {
-    return get_called;
+long number_of_gets(HASH_TABLE *table) {
+    return table->gets;
 };
+
+long number_of_puts(HASH_TABLE *table) {
+    return table->puts;
+};
+
+long number_of_comparisons(HASH_TABLE *table) {
+    int i = 0;
+    long comparisons = 0;
+    for (i = 0; i < table->slots; i++) {
+        if (table->buckets[i] != NULL) {
+            comparisons += number_of_equality_checks(table->buckets[i]);
+        }
+    }
+    return comparisons;
+}
 
 static BUCKET *get_bucket(HASH_TABLE *table, void *key) {
     int slot = bucket_for(table->slots, table->hash(key));
@@ -31,6 +42,7 @@ static ITEM *clone(ITEM *item) {
 }
 
 void put(HASH_TABLE *table, ITEM *item) {
+    table->puts++;
     BUCKET *bucket = get_bucket(table, item->key);
     put_in(bucket, clone(item));
 }
@@ -41,11 +53,13 @@ HASH_TABLE *create_hash_table(EQUALS_FUNCTION *equals, HASH_FUNCTION *hash, int 
     table->slots = number_of_buckets;
     table->equals = equals;
     table->hash = hash;
+    table->puts = 0;
+    table->gets = 0;
     return table;
 }
 
 ITEM *get(HASH_TABLE *table, void *key) {
-    get_called += 1;
+    table->gets++;
     BUCKET *bucket = get_bucket(table, key);
     if (bucket != NULL) {
         return get_from(bucket, key);

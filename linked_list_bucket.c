@@ -16,22 +16,17 @@ typedef struct entry {
 struct bucket {
     LINKED_ENTRY *first;
     EQUALS_FUNCTION *equals;
+    long comparisons;
 };
 
-static long number_of_comparisons = 0;
-
-long comparisons() {
-    return number_of_comparisons;
-}
-
-static LINKED_ENTRY *find_entry_in_list(EQUALS_FUNCTION *equals, LINKED_ENTRY *start, void *key) {
+static LINKED_ENTRY *find_entry_in_list(BUCKET* bucket, LINKED_ENTRY *start, void *key) {
     LINKED_ENTRY *current = start;
-    number_of_comparisons += 1;
+    bucket->comparisons += 1;
 
-    while (!equals(current->item->key, key)) {
+    while (!bucket->equals(current->item->key, key)) {
         if (current->next == NULL) return NULL;
         current = current->next;
-        number_of_comparisons += 1;
+        bucket->comparisons += 1;
     }
     return current;
 }
@@ -49,7 +44,7 @@ static void place_first(BUCKET *bucket, ITEM *item, LINKED_ENTRY *current_first)
 }
 
 static void add_to_bucket(BUCKET *bucket, ITEM *item, LINKED_ENTRY *current_first) {
-    LINKED_ENTRY *exists = find_entry_in_list(bucket->equals, current_first, item->key);
+    LINKED_ENTRY *exists = find_entry_in_list(bucket, current_first, item->key);
     if (exists == NULL) {
         place_first(bucket, item, current_first);
     } else {
@@ -59,6 +54,7 @@ static void add_to_bucket(BUCKET *bucket, ITEM *item, LINKED_ENTRY *current_firs
 BUCKET *create_new_bucket(EQUALS_FUNCTION *equals) {
     BUCKET *bucket = reserve_zeroed(sizeof(BUCKET));
     bucket->equals = equals;
+    bucket->comparisons = 0;
     return bucket;
 }
 
@@ -76,7 +72,7 @@ ITEM *get_from(BUCKET *bucket, void *key) {
     if (start == NULL) {
         return NULL;
     }
-    LINKED_ENTRY *entry = find_entry_in_list(bucket->equals, start, key);
+    LINKED_ENTRY *entry = find_entry_in_list(bucket, start, key);
     if (entry != NULL) {
         return entry->item;
     }
@@ -99,4 +95,8 @@ REPORT *report_on_bucket(BUCKET *bucket) {
         entry = entry->next;
     }
     return report;
+}
+
+long number_of_equality_checks(BUCKET *bucket) {
+    return bucket->comparisons;
 }

@@ -18,12 +18,12 @@ unsigned long charHash(void *value) {
     return lower;
 }
 
-unsigned long intHash(void *value) {
+unsigned long hash_longs(void *value) {
     int *translation = (int *) value;
     return *translation;
 }
 
-int intEquals(void *this, void *that) {
+int long_equals(void *this, void *that) {
     int *first = (int *) this;
     int *second = (int *) that;
     return *first == *second;
@@ -72,7 +72,7 @@ int main(int argc, char const *argv[]) {
 
 
 void testWithInts() {
-    HASH_TABLE *table = create_hash_table(&intEquals, &intHash, 5);
+    HASH_TABLE *table = create_hash_table(&long_equals, &hash_longs, 5);
     put(table, create_int_item(1, 2));
     put(table, create_int_item(1, 3));
     put(table, create_int_item(3, 27));

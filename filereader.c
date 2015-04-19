@@ -18,3 +18,4 @@ char *read_from(char *file_name) {
     buffer[file_size] = 0;
     return buffer;
 }
+
