@@ -5,15 +5,15 @@ static const int FALSE = 0;
 static const int TRUE = 1;
 typedef struct tree TREE;
 
-typedef void *(GET_FUNCTION)(void *buffer, unsigned long position);
+typedef void *(GET_FUNCTION)(void *buffer, long position);
 
-typedef int (EQUALITY_FUNCTION)(void *buffer, unsigned long first, unsigned long last);
+typedef int (EQUALITY_FUNCTION)(void *buffer, long first, long last);
 
-typedef char *(TO_STRING_FUNCTION)(void *buffer, unsigned long first, int length);
+typedef char *(TO_STRING_FUNCTION)(void *buffer, long first, int length);
 
 typedef struct string {
     void *buffer;
-    unsigned long buffer_length;
+    long buffer_length;
     GET_FUNCTION *get;
     EQUALITY_FUNCTION *equals;
     TO_STRING_FUNCTION *to_string;

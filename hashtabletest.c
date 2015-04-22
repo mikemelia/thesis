@@ -9,7 +9,7 @@ void testWithChars();
 
 void testWithThings();
 
-unsigned long charHash(void *value) {
+long charHash(void *value) {
     char *translation = (char *) value;
     int lower = *translation - 'a';
     if (lower < 0) {
@@ -18,7 +18,7 @@ unsigned long charHash(void *value) {
     return lower;
 }
 
-unsigned long hash_longs(void *value) {
+long hash_longs(void *value) {
     int *translation = (int *) value;
     return *translation;
 }
@@ -81,7 +81,7 @@ void testWithInts() {
     for (key = 0; key < 20; key++) {
         ITEM *found = get(table, &key);
         if (found) {
-            unsigned long *i = (unsigned long *) found->value;
+            long *i = (long *) found->value;
             log_info("table search for %d found entry with value %lu", key, *i);
         }
     }

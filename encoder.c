@@ -25,9 +25,9 @@ void encode(FILE *from, FILE *to) {
     size_t len = 0;
     int can_write = false;
     BITVEC *vector = initialise_bit_vector();
-    unsigned long count = 0;
+    long count = 0;
     while (getline(&buffer, &len, from) != -1) {
-        unsigned long i = strtoul(buffer, NULL, 10);
+        long i = strtoul(buffer, NULL, 10);
         if (i == -1) {
             if (can_write) {
                 write_vector(to, vector);

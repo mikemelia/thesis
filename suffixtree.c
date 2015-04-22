@@ -13,21 +13,21 @@ int equals(void *first, void *second) {
     return adjust_char((char *) first) == adjust_char((char *) second);
 }
 
-unsigned long hash(void *key) {
+long hash(void *key) {
     return adjust_char((char *) key);
 }
 
-int char_equals(void *buffer, unsigned long first, unsigned long second) {
+int char_equals(void *buffer, long first, long second) {
     char *as_char = (char *) buffer;
     return as_char[first] == as_char[second];
 }
 
-void *char_get(void *buffer, unsigned long position) {
+void *char_get(void *buffer, long position) {
     char *as_char = (char *) buffer;
     return &as_char[position];
 }
 
-char *to_string(void *buffer, unsigned long first, int length) {
+char *to_string(void *buffer, long first, int length) {
     char *as_string = reserve_zeroed(sizeof(char) * (length + 1));
     strncpy(as_string, &buffer[first], length);
     return as_string;
@@ -63,19 +63,22 @@ int main(int argc, char const *argv[]) {
 //    string.buffer = read_from("/Users/michael/Dropbox/University/dev/thesis/test3.txt");
 //    string.buffer = read_from("/Users/michael/Dropbox/University/dev/thesis/test2.txt");
 
-//    assert_in(1, "ab", "abcabxabcd$", 3);
-//    assert_in(1, "x", "abcabxabcd$", 1);
-//    assert_in(1, "a", "abcabxabcd$", 3);
-//    assert_in(2, "*", read_from("/Users/michael/Dropbox/University/dev/thesis/test.txt"), 9);
-//    assert_in(2, "**", read_from("/Users/michael/Dropbox/University/dev/thesis/test.txt"), 5);
-//    assert_in(2, "**T", read_from("/Users/michael/Dropbox/University/dev/thesis/test.txt"), 2);
-//    assert_in(3, "*", read_from("/Users/michael/Dropbox/University/dev/thesis/test3.txt"), 8);
-//    assert_in(3, "**", read_from("/Users/michael/Dropbox/University/dev/thesis/test3.txt"), 4);
-//    assert_in(3, "**", read_from("/Users/michael/Dropbox/University/dev/thesis/test3.txt"), 4);
-//    assert_in(3, "***", read_from("/Users/michael/Dropbox/University/dev/thesis/test3.txt"), 2);
-//    assert_in(4, "*", read_from("/Users/michael/Dropbox/University/dev/thesis/test4.txt"), 10);
+    assert_in(1, "ab", "abcabxabcd$", 3);
+    assert_in(1, "x", "abcabxabcd$", 1);
+    assert_in(1, "a", "abcabxabcd$", 3);
+    assert_in(2, "*", read_from("/Users/michael/Dropbox/University/dev/thesis/test.txt"), 9);
+    assert_in(2, "**", read_from("/Users/michael/Dropbox/University/dev/thesis/test.txt"), 5);
+    assert_in(2, "**T", read_from("/Users/michael/Dropbox/University/dev/thesis/test.txt"), 2);
+    assert_in(3, "*", read_from("/Users/michael/Dropbox/University/dev/thesis/test3.txt"), 8);
+    assert_in(3, "**", read_from("/Users/michael/Dropbox/University/dev/thesis/test3.txt"), 4);
+    assert_in(3, "**", read_from("/Users/michael/Dropbox/University/dev/thesis/test3.txt"), 4);
+    assert_in(3, "***", read_from("/Users/michael/Dropbox/University/dev/thesis/test3.txt"), 2);
+    assert_in(4, "*", read_from("/Users/michael/Dropbox/University/dev/thesis/test4.txt"), 10);
     assert_in(5, "*", read_from("/Users/michael/Dropbox/University/dev/thesis/test2.txt"), 38);
-//    assert_in(5, "***", read_from("/Users/michael/Dropbox/University/dev/thesis/test2.txt"), 30);
-//    assert_in(6, "English", read_from("/Volumes/Flash/0ws0110.txt"), 1);
+    assert_in(5, "***", read_from("/Users/michael/Dropbox/University/dev/thesis/test2.txt"), 30);
+    assert_in(6, "English", read_from("/Volumes/Flash/0ws0110.txt"), 27);
+    assert_in(7, "*", read_from("/Users/michael/Dropbox/University/dev/thesis/test6.txt"), 9);
+    assert_in(7, "***", read_from("/Users/michael/Dropbox/University/dev/thesis/test6.txt"), 3);
+    assert_in(8, "*", read_from("/Users/michael/Dropbox/University/dev/thesis/test8.txt"), 19);
 }
 

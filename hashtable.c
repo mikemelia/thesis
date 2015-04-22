@@ -26,8 +26,21 @@ long number_of_comparisons(HASH_TABLE *table) {
     return comparisons;
 }
 
+void reset_gets(HASH_TABLE *table) {
+    table->gets = 0;
+}
+
+void reset_comparisons(HASH_TABLE *table) {
+    int i = 0;
+    for (i = 0; i < table->slots; i++) {
+        if (table->buckets[i] != NULL) {
+            reset_bucket_comparison(table->buckets[i]);
+        }
+    }
+}
+
 static BUCKET *get_bucket(HASH_TABLE *table, void *key) {
-    int slot = bucket_for(table->slots, table->hash(key));
+    long slot = bucket_for(table->hash(key), table->slots);
     if (table->buckets[slot] == NULL) {
         table->buckets[slot] = create_new_bucket(table->equals);
     }

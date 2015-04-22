@@ -3,9 +3,9 @@
 #include "def.h"
 #include "allocation.h"
 
-void add_encoding_for(BITVEC *vector, unsigned long i);
+void add_encoding_for(BITVEC *vector, long i);
 
-int get_next_decoded_integer_from(BITVEC *vector, unsigned long *i);
+int get_next_decoded_integer_from(BITVEC *vector, long *i);
 
 BITVEC *initialise_bit_vector();
 
@@ -23,8 +23,8 @@ BITVEC *initialise_bit_vector() {
 
 void decode(FILE *from, FILE *to) {
     BITVEC *vector = initialise_bit_vector();
-    unsigned long count = 0;
-    unsigned long number;
+    long count = 0;
+    long number;
     while (read_vector_from_file(vector, from) != -1) {
         fprintf(to, "-1\n");
         while (get_next_decoded_integer_from(vector, &number) != -1) {

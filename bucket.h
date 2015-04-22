@@ -15,5 +15,7 @@ ITEM *get_from(BUCKET *bucket, void *key);
 REPORT *report_on_bucket(BUCKET *bucket);
 BUCKET *create_new_bucket(EQUALS_FUNCTION *equals);
 long number_of_equality_checks(BUCKET *bucket);
+void reset_bucket_comparison(BUCKET *bucket);
+
 
 #endif //THESIS_BUCKET_H

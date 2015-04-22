@@ -30,6 +30,10 @@ long number_of_puts(HASH_TABLE *table);
 
 long number_of_comparisons(HASH_TABLE *table);
 
+void reset_gets(HASH_TABLE *table);
+
+void reset_comparisons(HASH_TABLE *table);
+
 
 REPORT *report_on(HASH_TABLE *table);
 

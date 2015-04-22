@@ -100,3 +100,7 @@ REPORT *report_on_bucket(BUCKET *bucket) {
 long number_of_equality_checks(BUCKET *bucket) {
     return bucket->comparisons;
 }
+
+void reset_bucket_comparison(BUCKET *bucket) {
+    bucket->comparisons = 0;
+}

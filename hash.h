@@ -5,8 +5,8 @@
 #ifndef THESIS_HASH_H
 #define THESIS_HASH_H
 
-typedef unsigned long (HASH_FUNCTION)(void *);
+typedef long (HASH_FUNCTION)(void *);
 
-int bucket_for(int slots, unsigned long value);
+long bucket_for(long hash_code, long slots);
 
 #endif //THESIS_HASH_H
