@@ -23,7 +23,7 @@ static LINKED_ENTRY *find_entry_in_list(BUCKET* bucket, LINKED_ENTRY *start, voi
     LINKED_ENTRY *current = start;
     bucket->comparisons += 1;
 
-    while (!bucket->equals(current->item->key, key)) {
+    while (bucket->equals(current->item->key, key) != 0) {
         if (current->next == NULL) return NULL;
         current = current->next;
         bucket->comparisons += 1;

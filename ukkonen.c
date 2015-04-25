@@ -8,6 +8,11 @@ typedef struct edge {
     long *end;
 } EDGE;
 
+typedef struct list_of_tables {
+    HASH_TABLE *table;
+    struct list_of_tables *next;
+} TABLES;
+
 typedef struct node {
     EDGE *edge;
     HASH_TABLE *children;
@@ -28,9 +33,9 @@ struct tree {
     NODE *root;
     CONTEXT *context;
     STRING *string;
+    TABLES *tables;
+    long nodes;
 };
-
-static int number_of_nodes = 0;
 
 static void *at_position(TREE *tree, long position) {
     return tree->string->get(tree->string->buffer, position);
@@ -41,7 +46,14 @@ static long position_in_active_edge(TREE *tree) {
 }
 
 static HASH_TABLE *create_children(TREE *tree) {
-    return create_hash_table(tree->equals, tree->hash, 26);
+    HASH_TABLE *hash_table = create_hash_table(tree->equals, tree->hash, 8);
+    TABLES *tables = reserve_zeroed(sizeof(TABLES));
+    tables->table = hash_table;
+    if (tree->tables != NULL) {
+        tables->next = tree->tables;
+    }
+    tree->tables = tables;
+    return hash_table;
 }
 
 static CONTEXT *initialise_context(TREE *tree) {
@@ -61,6 +73,7 @@ static TREE *create_initial_implicit_tree(EQUALS_FUNCTION *equals, HASH_FUNCTION
     tree->hash = hash;
     tree->root = reserve(sizeof(NODE));
     tree->string = reserve(sizeof(STRING));
+    tree->nodes = 0;
     tree->root->edge = reserve(sizeof(EDGE));
     tree->root->children = create_children(tree);
     tree->root->suffix_link = NULL;
@@ -73,7 +86,7 @@ static NODE *create_node(TREE *tree) {
     node->edge = reserve(sizeof(EDGE));
     node->children = create_children(tree);
     node->suffix_link = NULL;
-    number_of_nodes++;
+    tree->nodes++;
     return node;
 }
 
@@ -224,7 +237,7 @@ static void add_node(TREE *tree, int latest_position) {
         } else {
             if (reset_active_point(tree)) continue;
             NODE *node_with_active_edge = get_value(active_node(tree)->children, at_position(tree, active_edge(tree)));
-            if (tree->string->equals(tree->string->buffer, node_with_active_edge->edge->start + position_in_active_edge(tree), latest_position)) {
+            if (tree->string->equals(tree->string->buffer, node_with_active_edge->edge->start + position_in_active_edge(tree), latest_position) == 0) {
                 tree->context->active_length++;
                 if (active_node(tree) != root_of(tree)) create_suffix_link(previously_inserted, active_node(tree));
                 break;
@@ -299,4 +312,39 @@ int num_positions_matching(TREE *tree, char *pattern) {
         }
     }
     return num_children(node);
+}
+
+
+long total_number_of_puts(TREE *tree) {
+    TABLES *tables = tree->tables;
+    long i = 0;
+    while (tables != NULL) {
+        i += number_of_puts(tables->table);
+        tables = tables->next;
+    }
+    return i;
+}
+
+long total_number_of_gets(TREE *tree) {
+    TABLES *tables = tree->tables;
+    long i = 0;
+    while (tables != NULL) {
+        i += number_of_gets(tables->table);
+        tables = tables->next;
+    }
+    return i;
+}
+
+long total_number_of_comparisons(TREE *tree) {
+    TABLES *tables = tree->tables;
+    long i = 0;
+    while (tables != NULL) {
+        i += number_of_comparisons(tables->table);
+        tables = tables->next;
+    }
+    return i;
+}
+
+long number_of_nodes(TREE *tree) {
+    return tree->nodes;
 }

@@ -19,3 +19,24 @@ char *read_from(char *file_name) {
     return buffer;
 }
 
+long number_of_lines(char *file_name) {
+    FILE *file = fopen(file_name, "r");
+    char *line = reserve(128 * sizeof(char));
+    long i = 0;
+    while ((line = fgets(line, 128, file)) && i < 10000000) {
+        ++i;
+    }
+    fclose(file);
+    return i;
+}
+
+void read_into(char *file_name, long *array) {
+    FILE *file = fopen(file_name, "r");
+    char *line = reserve(128 * sizeof(char));
+    long i = 0;
+    while ((line = fgets(line, 128, file)) && i < 10000000) {
+        array[i++] = atol(line);
+    }
+    array[i] = -2;
+    fclose(file);
+}

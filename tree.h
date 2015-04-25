@@ -1,23 +1,10 @@
 #include "hashtable.h"
+#include "string.h"
 
 struct tree;
 static const int FALSE = 0;
 static const int TRUE = 1;
 typedef struct tree TREE;
-
-typedef void *(GET_FUNCTION)(void *buffer, long position);
-
-typedef int (EQUALITY_FUNCTION)(void *buffer, long first, long last);
-
-typedef char *(TO_STRING_FUNCTION)(void *buffer, long first, int length);
-
-typedef struct string {
-    void *buffer;
-    long buffer_length;
-    GET_FUNCTION *get;
-    EQUALITY_FUNCTION *equals;
-    TO_STRING_FUNCTION *to_string;
-} STRING;
 
 TREE *create_tree(EQUALS_FUNCTION *equals, HASH_FUNCTION *hash);
 
@@ -26,3 +13,8 @@ void print_tree(TREE *tree);
 void add_string(TREE *tree, STRING *string);
 
 int num_positions_matching(TREE *tree, char *pattern);
+
+long total_number_of_puts(TREE *tree);
+long total_number_of_gets(TREE *tree);
+long total_number_of_comparisons(TREE *tree);
+long number_of_nodes(TREE *tree);

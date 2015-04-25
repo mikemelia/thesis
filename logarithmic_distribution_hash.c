@@ -3,6 +3,8 @@
 //
 #include <math.h>
 #include "hash.h"
+#include "string.h"
+
 #define LOG2(X) ((unsigned) (8*sizeof (long long) - __builtin_clzll((X))))
 
 static int number_of_slots_needed(int number_of_bits) {
@@ -32,4 +34,7 @@ long bucket_for(long hash_code, long slots) {
         number_of_slots_available -= number_of_slots_taken;
     }
     return start + slot_for(number_of_slots_taken, hash_code - start);
+}
+
+void prepare_with(STRING *string, HASH_FUNCTION *hash_function) {
 }
